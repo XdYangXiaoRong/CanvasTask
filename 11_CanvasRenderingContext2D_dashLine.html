@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		#canvas{
+			position: absolute;
+			left:10px;
+			top:10px;
+			box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+			background: #fff;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="300" >
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+			context = myCanvas.getContext('2d'),
+			moveToFunction=CanvasRenderingContext2D.prototype.moveTo;
+		CanvasRenderingContext2D.prototype.lastMoveToLocation={};
+		console.log(2222,CanvasRenderingContext2D,moveToFunction)
+
+		CanvasRenderingContext2D.prototype.moveTo = function(x,y){
+			moveToFunction.apply(context,[x,y]);
+			this.lastMoveToLocation.x=x;
+			this.lastMoveToLocation.y=y;
+			console.log(this.lastMoveToLocation)
+		}
+
+		CanvasRenderingContext2D.prototype.dashedLineTo = function(x,y,dashLength){
+			// console.log("moveTo",this.moveTo)
+			dashLength = dashLength === undefined ? 5 : dashLength;
+			var startX = this.lastMoveToLocation.x;
+			var startY = this.lastMoveToLocation.y;
+
+			var deltaX = x-startX;
+			var deltaY = y-startY;
+			var numberDashes = Math.floor(Math.sqrt(deltaX*deltaX+deltaY*deltaY)/dashLength);
+			for(var i=0;i<numberDashes;++i){
+				if(i%2===0){
+					this.moveTo(startX+(deltaX/numberDashes)*i,startY+(deltaY/numberDashes)*i);
+				}else{
+					this.lineTo(startX+(deltaX/numberDashes)*i,startY+(deltaY/numberDashes)*i);
+				}
+			}
+			this.moveTo(x,y);//以现在的终点为下次画线的起点
+
+		};
+
+		context.lineWidth = 3;
+		context.strokeStyle = 'blue'
+		context.moveTo(20,20);
+		context.dashedLineTo(myCanvas.width-20,20);
+		context.dashedLineTo(myCanvas.width-20,myCanvas.height-20);
+		context.dashedLineTo(20,myCanvas.height-20);
+		context.dashedLineTo(20,20);
+		context.dashedLineTo(myCanvas.width-20,myCanvas.height-20);
+		context.stroke();
+		
+	</script>
+</body>
+</html>

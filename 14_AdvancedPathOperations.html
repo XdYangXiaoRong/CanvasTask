@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas和事件</title>
+	<style type="text/css">
+		body{
+			background: #ddd;
+		}
+		#canvas{
+			position: absolute;
+			left:10px;
+			top:10px;
+			box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+			background: #fff;
+			/*cursor: pointer;*/
+			/*width:1000px;
+			height:500px;*/
+			/*border:thin inset rgba(100,150,230,0.5);*/
+		}
+		#controls{
+			position: absolute;
+			top:25px;
+			left:25px;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="1000" height="800">
+		该浏览器不支持canvas！
+	</canvas>
+	<div id="controls">
+		Stroke color:
+		<select id="strokeStyleSelect">
+			<option value="red">red</option>
+			<option value="green">green</option>
+			<option value="blue">blue</option>
+			<option value="orange">orange</option>
+			<option value="goldenrod">goldenrod</option>
+			<option value="navy">navy</option>
+			<option value="purple">purple</option>
+		</select>
+
+        Fill color:
+        <select id="fillStyleSelect">
+            <option value="red">red</option>
+            <option value="green">green</option>
+            <option value="blue">blue</option>
+            <option value="orange">orange</option>
+            <option value="goldenrod">goldenrod</option>
+            <option value="navy">navy</option>
+            <option value="purple">purple</option>
+        </select>
+
+        Sides:
+        <select id="sidesSelect">
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">10</option>
+        </select>
+
+        stratAngle:
+        <select id="stratAngleSelect">
+            <option value="0">0</option>
+            <option value="30">30</option>
+            <option value="0">60</option>
+            <option value="0">90</option>
+        </select>
+		Fill:
+		<input type="checkbox"  id="fillCheckbox" name="" checked>
+		<input type="button"  id="eraseAllButton" name="" value="全部擦除">
+        Edit:
+        <input type="checkbox"  id="editCheckbox" name="">
+	</div>
+    <script type="text/javascript" src="./js/DrawPolygon.js"></script>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+		    context = myCanvas.getContext('2d'),
+		    controls =document.getElementById('controls'),
+		    strokeStyleSelect = document.getElementById('strokeStyleSelect'),
+            fillStyleSelect = document.getElementById('fillStyleSelect'),
+		    fillCheckbox = document.getElementById('fillCheckbox'),
+		    eraseAllButton = document.getElementById('eraseAllButton'),
+            sidesSelect = document.getElementById('sidesSelect'),
+            editCheckbox = document.getElementById('editCheckbox'),
+
+		    drawingSurfaceImageData,
+		    mousedown={},
+		    rubberbandRect={},
+
+		    dragging = false,//选中某个元素时，dragging为选中的元素
+            draggingOffsetX,
+            draggingOffsetY,
+
+            sides = 8,
+            stratAngle = 0,
+		    guidewires =true,
+            editing = false,
+            polygons = [];
+		    
+		//浏览器通过事件对象传递给监听器的鼠标坐标，是窗口坐标，而不是相对于canvas自身的坐标。大部分情况下，开发者需要知道的是发生鼠标事件的点相对于canvas的位置，而不是在整个窗口中的位置。
+		function windowToCanvas(canvas,x,y){//x,y为当前鼠标相对于坐标轴的位置
+			var bbox=canvas.getBoundingClientRect();
+			//返回相对于canvas的坐标值
+			return {
+				x:x-bbox.left*(canvas.width/bbox.width),
+				y:y-bbox.top*(canvas.height/bbox.height)
+			}
+		}
+
+		function saveDrawingSurface(){
+			drawingSurfaceImageData = context.getImageData(0,0,myCanvas.width,myCanvas.height);
+		}
+        
+        function restoreDrawingSurface() {
+        	context.putImageData(drawingSurfaceImageData,0,0);
+        }
+
+       //draw a polygon
+        function drawPolygon(polygon){
+            context.beginPath();
+            polygon.createPath(context);
+            polygon.stroke(context);
+            if(fillCheckbox.checked){
+                polygon.fill(context);
+            }
+        }
+
+        //Rubber bands
+        function updateRubberbandRectangle(loc){
+        	rubberbandRect.width = Math.abs(loc.x-mousedown.x);
+        	rubberbandRect.height = Math.abs(loc.y-mousedown.y);
+
+        	if(loc.x>mousedown.x){
+        		rubberbandRect.left=mousedown.x;
+        	}else{
+        		rubberbandRect.left=loc.x;
+        	}
+        	if(loc.y>mousedown.y){
+        		rubberbandRect.top=mousedown.y;
+        	}else{
+        		rubberbandRect.top=loc.y;
+        	}
+        }
+
+        function drawRubberbandShape(loc,sides,stratAngle){
+        	// context.beginPath();
+        	// context.moveTo(mousedown.x,mousedown.y);
+        	// context.lineTo(loc.x,loc.y);
+        	// context.stroke();
+            var polygon = new Polygon(mousedown.x,mousedown.y,
+                rubberbandRect.width,
+                parseInt(sidesSelect.value),
+                (Math.PI/180)*parseInt(stratAngleSelect.value),
+                context.strokeStyle,
+                context.fillStyle,
+                fillCheckbox.checked);
+            drawPolygon(polygon);
+
+            if(!dragging){//释放鼠标时，将整个图形加入到图形队列
+                polygons.push(polygon)
+            }
+        }
+
+        function updateRubberband(loc,sides,stratAngle){
+        	updateRubberbandRectangle(loc);
+        	drawRubberbandShape(loc,sides,stratAngle);
+        }
+
+        //Guide wires
+        function drawVerticalLine(x) {
+        	context.beginPath();
+        	context.moveTo(x+0.5,0);
+        	context.lineTo(x+0.5,myCanvas.height);
+        	context.stroke();
+        }
+
+        function drawHorizontalLine(y) {
+        	context.beginPath();
+        	context.moveTo(0,y+0.5);
+        	context.lineTo(myCanvas.width,y+0.5);
+        	context.stroke();
+        }
+
+        function drawGuidewires(x,y) {
+        	context.save();
+        	context.strokeStyle='rgba(0,0,230,0.4)';
+        	context.lineWidth = 0.5;
+        	drawVerticalLine(x); 
+        	drawHorizontalLine(y);
+        	context.restore();
+        }
+
+        function drawPolygons(){
+            polygons.forEach(function(polygony,index){
+                console.log(index,polygony)
+                drawPolygon(polygony);
+            })
+        }
+
+        //Dragging
+        function startDragging(loc){
+            saveDrawingSurface();
+            mousedown.x = loc.x;
+            mousedown.y = loc.y;
+        }
+
+        function startEditing(){
+            myCanvas.style.cursor = 'pointer';
+            editing = true;
+        }
+
+        function stopEditing(){
+            myCanvas.style.cursor = 'crosshair';
+            editing = false;
+        }
+
+        //事件处理
+        myCanvas.onmousedown = function(e){
+        	var loc=windowToCanvas(myCanvas,e.clientX,e.clientY);
+        	e.preventDefault();
+        	if(editing){
+                polygons.forEach(function(polygon){
+                    polygon.createPath(context);
+                    if(context.isPointInPath(loc.x,loc.y)){//如果指定的点位于当前路径中,返回true
+                        startDragging(loc);
+                        dragging = polygon;//当前被拖动的对象
+                        console.log("dragging",dragging)
+                        draggingOffsetX = loc.x - polygon.x;//拖动点与圆心的便宜距离
+                        draggingOffsetY = loc.y - polygon.y;
+                        return;
+                    }
+                })
+            }else{
+                startDragging(loc);
+                dragging = true;
+            }
+        }
+
+        myCanvas.onmousemove=function(e){
+        	var loc=windowToCanvas(myCanvas,e.clientX,e.clientY);
+            e.preventDefault();
+        	if(editing && dragging){//编辑模式，可拖动元素改变元素的位置，单不能绘制元素
+                // console.log(11111,dragging)
+        		dragging.x = loc.x - draggingOffsetX;
+                dragging.y = loc.y - draggingOffsetY;
+                context.clearRect(0,0,myCanvas.width,myCanvas.height);
+                drawPolygons();     		
+        	}else{
+                if(dragging){
+                    restoreDrawingSurface();
+                    updateRubberband(loc,sides,stratAngle);
+                    if(guidewires){//绘制网格
+                        drawGuidewires(loc.x,loc.y);
+                    }
+                }
+            }
+        }
+
+        myCanvas.onmouseup = function(e){
+        	var loc = windowToCanvas(myCanvas,e.clientX,e.clientY);
+            dragging = false;
+            if(!editing){
+                restoreDrawingSurface();
+                updateRubberband(loc); 
+            }
+        }
+        eraseAllButton.onclick = function(e){
+        	context.clearRect(0,0,myCanvas.width,myCanvas.height);
+             saveDrawingSurface();
+        }
+		strokeStyleSelect.onchange = function(e){
+			context.strokeStyle = strokeStyleSelect.value;
+		}
+        fillStyleSelect.onchange = function(e){
+            context.fillStyle = fillStyleSelect.value;
+        }
+        editCheckbox.onchange  = function(e){
+            if(editCheckbox.checked){
+                startEditing();
+            }else{
+                stopEditing();
+            }
+        }
+		// guidewireCheckbox.onchange = function(e){
+		// 	Guidewires = guidewireCheckbox.checked;
+		// }
+
+		context.strokeStyle = strokeStyleSelect.value;
+        context.fillStyle = fillStyleSelect.value;
+
+        context.shadowColor = 'rgba(0,0,0,0.4)';
+        context.shadowOffsetX = 2;
+        context.shadowOffsetY = 2;
+        context.shadowBlur = 4;
+	</script>
+</body>
+</html>

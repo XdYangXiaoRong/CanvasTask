@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		#canvas{
+			position: absolute;
+			left:10px;
+			top:10px;
+			box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+			background: #fff;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="1000" height="1000" >
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+			context = myCanvas.getContext('2d');
+		function DrawPolygon(x,y,Radius,numbers,stroleColor,fillColor){//x,y为该多边型的中心，Radius为圆的半径，number为多变型的边数
+			context.save();
+			context.beginPath();
+			context.translate(x,y);
+			// context.arc(0,0,100,0,Math.PI*2,false)
+			// context.stroke();
+			var numbersArray=[];
+			var loc=[];//存放数组
+			for(var i=0;i<numbers;i++){
+				numbersArray.push(i);
+				var angle=(Math.PI*2/numbers)*(i-3);
+				var x=Math.cos(angle)*Radius;
+				var y=Math.sin(angle)*Radius;
+				loc.push([x,y])
+			}
+			
+			console.log(loc[0][0],loc[0][1]);
+			context.moveTo(loc[0][0],loc[0][1]);
+			for(var i=1;i<loc.length;i++){
+				context.lineTo(loc[i][0],loc[i][1]);
+			}
+			context.closePath();
+			context.strokeStyle=stroleColor ? stroleColor :'red'
+			context.fillStyle = fillColor ? fillColor : 'white'
+			context.stroke();
+			context.fill();
+			context.restore();//将原点返回到原来的位置，撤销translate(x,y)缩成
+		}
+		DrawPolygon(300,300,150,10,'red','pink')
+		DrawPolygon(50,50,30,5,'red','yellow')
+		DrawPolygon(100,100,50,5,'red','blue')
+		context.globalCompositeOperation='destination-over';//在源图像上方显示目标图像。
+		DrawPolygon(300,300,180,10,'red','lightgray')
+		DrawPolygon(500,500,100,3,'red','pink')
+	    context.beginPath();
+		context.arc(500,500,100,0,Math.PI*2)
+		context.stroke();
+	</script>
+</body>
+</html>

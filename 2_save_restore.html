@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="300" style="background-color:pink">
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas');
+		var context = myCanvas.getContext('2d');
+		context.font="25px Arial";
+		context.fillStyle="blue";
+		context.strokeStyle="green";
+		context.fillText('Hello,canvas!',myCanvas.width/3, myCanvas.height/3)
+		context.strokeText('Hello,canvas!',myCanvas.width/3+20, myCanvas.height/3+30)
+		context.save();//保存当前绘制参数，用于下一次绘制
+
+		//选择新的颜色来绘制文字
+		context.fillStyle="red";
+		context.strokeStyle="yellow";
+		context.fillText('Hello,canvas2!',myCanvas.width/3+40, myCanvas.height/3+90);
+		context.strokeText('Hello,canvas2!',myCanvas.width/3+60, myCanvas.height/3+110)
+
+		context.restore();//取出之前的状态，重新绘制文字，不需要再重新定义绘制颜色
+		context.fillText('Hello,canvas3!',myCanvas.width/3, myCanvas.height/3+150);
+		context.strokeText('Hello,canvas3!',myCanvas.width/3+20, myCanvas.height/3+170)
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+</head>
+<body>
+	<canvas id="canvas" width="500" height="500" style="border-width:1px;border-style:solid;border-color:red">
+		该浏览器不支持canvas！
+	</canvas>
+	<div class="clock" style="font-size:20">
+		电子时钟:
+		<span id="eleClock" style="height:50px;line-height: 50px"></span>
+	</div>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas');
+		var context = myCanvas.getContext('2d');
+		var Radius=200,//圆圈的半径
+		    FontSize=20,//字体大小
+		    space=20,//为了让数字里圆圈有一定的距离，要给一个间距
+		    HourLength=80,//时针的长度
+		    MinuteLength=130,//分针的长度
+		    SecondLength=160;//秒针的长度
+
+		var eleClockValue=''//电子时钟的时刻
+
+		function drawCircle(){//画圆圈
+			context.beginPath();
+			context.arc(myCanvas.width/2,myCanvas.height/2,Radius,0,Math.PI*2,true);
+			context.stroke();
+		}
+
+		function drawNumbers(){//给时钟画上数字
+			var numbers=[1,2,3,4,5,6,7,8,9,10,11,12],
+				angle=0;
+				//两个刻度之间相差30°，1,2,3，……，12每一个数字在坐标轴上的位置分别是-60°，-30°，0°，30°,……,270°
+				numbers.forEach(function(number){//
+					angle=Math.PI/6*(number-3);//30°*(number-3)
+					/**myCanvas.width/2+Math.cos(angle)*(Radius+space):数字在画布上的x轴坐标
+					myCanvas.height/2+Math.sin(angle)*(Radius+space):数字在画布上的y轴坐标
+					context.measureText(text).width:在画布上输出文本之前，检查字体的宽度
+					*/
+					numberWidth=context.measureText(number).width;
+
+					context.fillText(number,myCanvas.width/2+Math.cos(angle)*(Radius+space)-numberWidth/2,myCanvas.height/2+Math.sin(angle)*(Radius+space)+FontSize/3)
+					
+				})
+
+		}
+		function drawCenter(){//绘制时钟的圆心
+			context.beginPath();
+			context.arc(myCanvas.width/2,myCanvas.height/2,5,0,Math.PI*2,true);
+			context.stroke();
+		}
+		function drawHand(deg,type){//根据传参在时钟上绘制时针，分针，秒针
+			var angle=0,length=0;
+			if(type==='hour'){//时针
+			  length=HourLength
+			}else if(type==='minute'){
+			   length=MinuteLength
+			}else{
+				length=SecondLength
+			}
+			context.moveTo(myCanvas.width/2,myCanvas.height/2);
+			context.lineTo(myCanvas.width/2+Math.cos(deg)*length,myCanvas.height/2+Math.sin(deg)*length);
+			context.stroke();
+		}
+
+		function drawHands(){//获取当前系统时间，得到绘制时针，分针，秒针所需的参数
+			var date= new Date(),
+			    hour=date.getHours(),
+			    minute = date.getMinutes(),
+			    second = date.getSeconds();
+			hour=hour>12?hour-12:hour;
+			//Math.PI/180等于1度
+			var deg=Math.PI/180;
+			//两个时刻是30度，被分成5格，每格6度，时钟每走12分钟，时针就走一小格，所以对时针而言，分针每走一分钟，时针就多走1/2度
+			var hourDeg=Math.PI/6*(hour-3)+minute/2*deg;
+			//分针一小时走完360度，1小时=60分钟，所以每走一分钟就走6度
+			var minuteDeg=Math.PI/6*(minute/5-3);
+			// 秒针一分钟走完360度，1分钟=60秒，所以每走一秒就走6度
+			var SecondDeg=Math.PI/6*(second/5-3);
+			drawHand(hourDeg,'hour')
+			drawHand(minuteDeg,'minute')
+			drawHand(SecondDeg,'second')
+
+			eleClockValue=hour+' : '+minute+' : '+second
+		}
+
+		function drawClock(){
+			context.clearRect(0,0,myCanvas.width,myCanvas.height);//每画下一秒的时钟图像之前要把画布清空
+			drawCircle();
+			drawNumbers();
+			drawCenter();
+			drawHands();
+		}
+		context.font=FontSize+"px Arial"
+		setInterval(function(){
+			drawClock();
+			var eleClock=document.getElementById('eleClock')
+			eleClock.innerHTML=eleClockValue
+		},1000)//1s重绘一次时钟
+			
+	</script>
+</body>
+</html>

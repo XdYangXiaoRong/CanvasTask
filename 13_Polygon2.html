@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		#canvas{
+			position: absolute;
+			left:10px;
+			top:10px;
+			box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+			background: #fff;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="600" >
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+			context = myCanvas.getContext('2d');
+		//Polygon
+		var Point = function(x,y){
+			this.x = x;
+			this.y = y;
+		};
+		var Polygon = function(centerX,centerY,radius,sides,startAngle,strokeStyle,fillStyle){
+			this.x = centerX;
+			this.y = centerY;
+			this.radius = radius;
+			this.sides = sides;
+			this.startAngle = startAngle;
+			this.strokeStyle = strokeStyle;
+			this.fillStyle = fillStyle;
+			// this.filled = filled;
+		}
+		Polygon.prototype={
+			getPoints:function(){
+				var points=[],
+				angle = this.startAngle || 0 ;
+			    for(var i=0;i<this.sides;++i){
+			    	points.push(new Point(this.x+this.radius*Math.sin(angle),
+			    		this.y-this.radius*Math.cos(angle)));
+			    	angle+=Math.PI*2/this.sides;
+			    }
+			    return points;
+			},
+			createPath:function(context){
+				var points = this.getPoints();
+				context.beginPath();
+				context.moveTo(points[0].x,points[0].y);
+				for(var i=1;i<this.sides;++i){
+					context.lineTo(points[i].x,points[i].y);
+				}
+				context.closePath();
+			},
+			stroke:function(context){
+				context.save();
+				this.createPath(context);
+				context.strokeStyle = this.strokeStyle;
+				context.stroke();
+				context.restore();
+			},
+			fill:function(context){
+				context.save();
+				this.createPath(context);
+				context.fillStyle = this.fillStyle;
+				context.fill();
+				context.restore();
+			},
+			move:function(x,y){
+				this.x=x;
+				this.y=y;
+			}
+		}
+		var polygon = new Polygon(100,100,50,6,Math.PI/3,'red','blue')
+		polygon.createPath(context)
+		polygon.stroke(context);
+		polygon.fill(context);
+
+		var polygon2 = new Polygon(300,300,100,10,Math.PI/2,'pink','yellow')
+		polygon2.createPath(context)
+		polygon2.stroke(context);
+		// polygon2.fill(context);
+	</script>
+</body>
+</html>

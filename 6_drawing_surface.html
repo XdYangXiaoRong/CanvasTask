@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		#canvas{
+			background: #ddd;
+			width:600px;
+			height:300px;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="300">
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas');
+		var context = myCanvas.getContext('2d');
+		context.font="15px Arial";
+		context.fillStyle="blue";
+		context.strokeStyle="green";
+		context.textAlign = 'center';
+		context.textBaseline = 'bottom';
+		context.fillText('Hello,canvas!',myCanvas.width/2, myCanvas.height/2)
+		context.strokeText('Hello,canvas!',myCanvas.width/2+20, myCanvas.height/2+50)
+	</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		.imgContent{
+			height:auto;
+		}
+		.imgContent img{
+			width:300px;
+			height: 150px;
+			float:left;
+			margin-right:20px;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="300" height="150" style="background-color:pink">
+		该浏览器不支持canvas！
+	</canvas>
+	<div class="imgContent">
+		<img src="" id="img1" />
+		<img src="" id="img2" />
+		<img src="" id="img3" />
+	</div>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas');
+		var context = myCanvas.getContext('2d');
+		context.font="38px Arial";
+		context.fillStyle="blue";
+		context.strokeStyle="green";
+		context.textAlign = 'center';
+		context.textBaseline = 'bottom';
+		context.fillText('Hello,canvas!',myCanvas.width/2, myCanvas.height/2)
+		context.strokeText('Hello,canvas!',myCanvas.width/2+20, myCanvas.height/2+50)
+
+		var fullQuality = canvas.toDataURL("image/jpeg", 1.0);
+		var mediumQuality = canvas.toDataURL("image/jpeg", 0.5);
+		var lowQuality = canvas.toDataURL("image/jpeg", 0.1);
+		document.getElementById('img1').setAttribute("src",fullQuality);
+		document.getElementById('img2').setAttribute("src",mediumQuality);
+		document.getElementById('img3').setAttribute("src",lowQuality);
+		
+	</script>
+</body>
+</html>

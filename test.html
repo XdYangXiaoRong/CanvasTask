@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="300" style="border:1px solid red">
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas');
+		var ctx = myCanvas.getContext('2d');
+		// ctx.moveTo(50,50); 
+		// ctx.lineTo(100,100); 
+		// ctx.lineTo(50,150); 
+		// ctx.lineWidth = "10"; 
+		// ctx.strokeStyle = "red"; 
+		// ctx.stroke();
+		// ctx.beginPath(); 
+		// ctx.moveTo(100,50); 
+		// ctx.lineTo(150,100); 
+		// ctx.lineTo(100,150); 
+		// ctx.lineWidth = "2";//默认是1
+		// ctx.strokeStyle="blue"; 
+		// ctx.closePath();//将折线闭合 
+		// ctx.stroke();
+		ctx.strokeColor="blue"
+		ctx.lineWidth=10;
+		ctx.beginPath(); 
+		ctx.moveTo(0,0); 
+		ctx.lineTo(300,0);
+		ctx.stroke(); 
+		// ctx.lineTo(150,150); 
+		// ctx.lineWidth = "2";
+		// ctx.fillStyle="red"; 
+		// ctx.closePath();//将折线闭合 
+		// ctx.fill();
+		//stroke只画边，与strokeStyle配套使用，fill将整个图形填充，与fillStyle配套使用
+
+		// ctx.rect(50,50,100,100); 
+		// ctx.fillStyle = "green"; 
+		// ctx.strokeStyle = "red"; 
+		// ctx.fill(); 
+		// ctx.stroke();
+
+		// ctx.beginPath(); 
+		// ctx.arc(200,200,80,0,Math.PI*2,false); 
+		// ctx.fillStyle="yellow"; ctx.fill(); 
+		// ctx.closePath(); 
+		// ctx.beginPath(); 
+		// ctx.arc(160,200,70,0,Math.PI*2,false); 
+		// ctx.fillStyle="white"; 
+		// ctx.fill();
+
+		 // ctx.textBaseline = "bottom"; 
+		 // ctx.textAlign = "center"; 
+		 // ctx.font = "italic 30px 微软雅黑"; 
+		 // ctx.fillText("青天流云",100,100);
+
+		 // ctx.moveTo(39,200);
+		 // ctx.quadraticCurveTo(200,0,300,200); 
+		 // ctx.stroke();
+
+		 // var lg=ctx.createLinearGradient(0,0,200,200);    
+		 // lg.addColorStop(0,"red");    
+		 // lg.addColorStop(0.5,"green");    
+		 // lg.addColorStop(1,"blue");    
+		 // ctx.fillStyle = lg;    
+		 // ctx.fillRect(0,0,200,200);
+
+		// var grd=ctx.createRadialGradient(300,150,10,300,150,150);
+		// grd.addColorStop(0,"red");
+		// grd.addColorStop(0.5,"yellow");
+		// grd.addColorStop(1,"white");
+		// ctx.fillStyle = grd;
+		// ctx.fillRect(0,0,600,300);    
+		// ctx.fill();
+
+		 // var backgroundImg = new Image(); 
+		 // backgroundImg.src = "./picture/canvas1.jpg"; 
+		 // backgroundImg.onload = function (){    
+		 // 	var bakImg = ctx.createPattern(backgroundImg,"repeat");    
+		 // 	ctx.fillStyle = bakImg;    
+		 // 	ctx.fillRect(0,0,600,300); 
+		 // }
+
+		// ctx.arc(300,150,50,0,Math.PI*2,false); 
+		// ctx.fillStyle="red"; 
+		// ctx.shadowOffsetX = 15; 
+		// ctx.shadowOffsetY = 15;
+		// ctx.shadowBlur = 10; 
+		// ctx.shadowColor = "gray"; 
+		// ctx.fill();
+
+		ctx.translate(100,100); 
+		ctx.rotate(Math.PI/6); 
+		ctx.fillStyle="red"; 
+		ctx.fillRect(0,0,150,100);
+
+	</script>
+</body>
+</html>

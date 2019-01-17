@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas和事件</title>
+	<style type="text/css">
+		body{
+			background: #ddd;
+		}
+		#canvas{
+			position: absolute;
+			left:50px;
+			top:50px;
+			/*cursor: pointer;*/
+			/*width:1000px;
+			height:500px;*/
+			/*border:thin inset rgba(100,150,230,0.5);*/
+		}
+		#readout{
+			margin-top:10px;
+			margin-left:15px;
+			color:blue;
+		}
+	</style>
+</head>
+<body>
+	<div id="readout"></div>
+	<canvas id="canvas" width="500" height="250" style="background-color:pink">
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+		    context = myCanvas.getContext('2d'),
+		    readout = document.getElementById('readout'),
+		    spritesheet = new Image();
+
+		//浏览器通过事件对象传递给监听器的鼠标坐标，是窗口坐标，而不是相对于canvas自身的坐标。大部分情况下，开发者需要知道的是发生鼠标事件的点相对于canvas的位置，而不是在整个窗口中的位置。
+		function windowToCanvas(canvas,x,y){//x,y为当前鼠标相对于坐标轴的位置
+			var bbox=canvas.getBoundingClientRect();
+			//返回相对于canvas的坐标值
+			console.log(canvas.width,bbox.width,context.canvas.width)
+			console.log(canvas.height,bbox.height,context.canvas.height)
+			return {
+				x:x-bbox.left*(canvas.width/bbox.width),
+				y:y-bbox.top*(canvas.height/bbox.height)
+			}
+		}
+        
+        function drawBackground(){
+        	var VERTICAL_LINE_SPACING=12,
+        		i=myCanvas.height;
+
+        	context.clearRect(0,0,myCanvas.width,myCanvas.height);
+        	// context.strokeStyle='lightgray';
+        	context.strokeStyle='gray';
+        	context.lineWidth=0.5;
+        	while(i>VERTICAL_LINE_SPACING*4){
+        		context.beginPath();
+        		context.moveTo(0,i);
+        		context.lineTo(myCanvas.width,i);
+        		context.stroke();
+        		i-=VERTICAL_LINE_SPACING;
+        	}
+        }
+        
+        function drawSpritesheet(){
+        	context.drawImage(spritesheet,0,0);
+        }
+
+        function drawGuidelines(x,y){
+        	context.strokeStyle='rgba(0,0,230,0.8)';
+        	context.lineWidth=0.5;
+        	drawVerticalLine(x);
+        	drawHorizontalLine(y);
+        }
+        function drawHorizontalLine(y){
+        	context.beginPath();
+        	context.moveTo(0,y+0.5);
+        	context.lineTo(myCanvas.width,y+0.5);
+        	context.stroke();
+        }
+
+        function drawVerticalLine(x){
+        	context.beginPath();
+        	context.moveTo(x+0.5,0);
+        	context.lineTo(x+0.5,myCanvas.height);
+        	context.stroke();
+        }
+        function updateReadout(x,y){
+        	readout.innerText='('+x.toFixed(0)+','+y.toFixed(0)+')';
+        }
+
+		myCanvas.onmousemove=function(e){
+			var loc = windowToCanvas(myCanvas,e.clientX,e.clientY);
+			console.log(loc)
+			drawBackground();
+			drawSpritesheet();
+			drawGuidelines(loc.x,loc.y);
+			updateReadout(loc.x,loc.y);
+		}
+		
+
+		spritesheet.src='./picture/penple.jpg';
+		spritesheet.onload = function (){    
+			 drawSpritesheet(); 
+	    }
+	
+		drawBackground();
+		
+	</script>
+</body>
+</html>

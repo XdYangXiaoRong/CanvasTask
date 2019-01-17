@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas和事件</title>
+	<style type="text/css">
+		body{
+			background: #ddd;
+		}
+		#canvas{
+			position: absolute;
+			left:10px;
+			top:10px;
+			box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+			background: #fff;
+			/*cursor: pointer;*/
+			/*width:1000px;
+			height:500px;*/
+			/*border:thin inset rgba(100,150,230,0.5);*/
+		}
+		#controls{
+			position: absolute;
+			top:25px;
+			left:25px;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="400">
+		该浏览器不支持canvas！
+	</canvas>
+	<div id="controls">
+		Stroke color:
+		<select id="strokeStyleSelect">
+			<option value="red">red</option>
+			<option value="green">green</option>
+			<option value="blue">blue</option>
+			<option value="orange">orange</option>
+			<option value="goldenrod">goldenrod</option>
+			<option value="navy">navy</option>
+			<option value="purple">purple</option>
+		</select>
+
+		Guidewires:
+		<input type="checkbox"  id="guidewireCheckbox" name="" checked="">
+		<input type="button"  id="eraseAllButton" name="" value="全部擦除">
+	</div>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+		    context = myCanvas.getContext('2d'),
+		    controls =document.getElementById('controls'),
+		    strokeStyleSelect = document.getElementById('strokeStyleSelect'),
+		    guidewireCheckbox = document.getElementById('guidewireCheckbox'),
+		    eraseAllButton = document.getElementById('eraseAllButton'),
+		    drawingSurfaceImageData,
+		    mousedown={},
+		    rubberbandRect={},
+		    dragging = false,
+		    guidewires = guidewireCheckbox.checked;
+		    console.log('drawingSurfaceImageData',drawingSurfaceImageData)
+		//浏览器通过事件对象传递给监听器的鼠标坐标，是窗口坐标，而不是相对于canvas自身的坐标。大部分情况下，开发者需要知道的是发生鼠标事件的点相对于canvas的位置，而不是在整个窗口中的位置。
+		function windowToCanvas(canvas,x,y){//x,y为当前鼠标相对于坐标轴的位置
+			var bbox=canvas.getBoundingClientRect();
+			//返回相对于canvas的坐标值
+			console.log(canvas.width,bbox.width,context.canvas.width)
+			console.log(canvas.height,bbox.height,context.canvas.height)
+			return {
+				x:x-bbox.left*(canvas.width/bbox.width),
+				y:y-bbox.top*(canvas.height/bbox.height)
+			}
+		}
+
+		function saveDrawingSurface(){
+			drawingSurfaceImageData = context.getImageData(0,0,myCanvas.width,myCanvas.height);
+		}
+        
+        function restoreDrawingSurface() {
+        	context.putImageData(drawingSurfaceImageData,0,0);
+        }
+       
+        function updateRubberbandRectangle(loc){
+        	rubberbandRect.width = Math.abs(loc.x-mousedown.x);
+        	rubberbandRect.height = Math.abs(loc.y-mousedown.y);
+
+        	if(loc.x>mousedown.x){
+        		rubberbandRect.left=mousedown.x;
+        	}else{
+        		rubberbandRect.left=loc.x;
+        	}
+        	if(loc.y>mousedown.y){
+        		rubberbandRect.top=mousedown.y;
+        	}else{
+        		rubberbandRect.top=loc.y;
+        	}
+        }
+
+        function drawRubberbandShape(loc){
+        	context.beginPath();
+        	context.moveTo(mousedown.x,mousedown.y);
+        	context.lineTo(loc.x,loc.y);
+        	context.stroke();
+        }
+
+        function updateRubberband(loc){
+        	updateRubberbandRectangle(loc);
+        	drawRubberbandShape(loc);
+        }
+
+        function drawVerticalLine(x) {
+        	context.beginPath();
+        	context.moveTo(x+0.5,0);
+        	context.lineTo(x+0.5,myCanvas.height);
+        	context.stroke();
+        }
+
+        function drawHorizontalLine(y) {
+        	context.beginPath();
+        	context.moveTo(0,y+0.5);
+        	context.lineTo(myCanvas.width,y+0.5);
+        	context.stroke();
+        }
+
+        function drawGuidewires(x,y) {
+        	context.save();
+        	context.strokeStyle='rgba(0,0,230,0.4)';
+        	context.lineWidth = 0.5;
+        	drawVerticalLine(x); 
+        	drawHorizontalLine(y);
+        	context.restore();
+        }
+        //时间处理
+        myCanvas.onmousedown = function(e){
+        	var loc=windowToCanvas(myCanvas,e.clientX,e.clientY);
+        	e.preventDefault();
+        	saveDrawingSurface();
+        	mousedown.x = loc.x;
+        	mousedown.y = loc.y;
+        	dragging = true;
+        }
+
+        myCanvas.onmousemove=function(e){
+        	var loc=windowToCanvas(myCanvas,e.clientX,e.clientY);
+        	if(dragging){
+        		e.preventDefault();
+        		loc=windowToCanvas(myCanvas,e.clientX,e.clientY);
+        		restoreDrawingSurface();
+        		updateRubberband(loc);
+
+        		if(guidewires){//绘制网格
+        			drawGuidewires(loc.x,loc.y);
+        		}
+        	}
+        }
+
+        myCanvas.onmouseup = function(e){
+        	loc = windowToCanvas(myCanvas,e.clientX,e.clientY);
+        	restoreDrawingSurface();
+        	updateRubberband(loc);
+        	dragging = false;
+        }
+        eraseAllButton.onclick = function(e){
+        	context.clearRect(0,0,myCanvas.width,myCanvas.height);
+             saveDrawingSurface();
+        }
+		strokeStyleSelect.onchange = function(e){
+			context.strokeStyle = strokeStyleSelect.value;
+		}
+		guidewireCheckbox.onchange = function(e){
+			Guidewires = guidewireCheckbox.checked;
+		}
+
+		context.strokeStyle = strokeStyleSelect.value;
+	</script>
+</body>
+</html>

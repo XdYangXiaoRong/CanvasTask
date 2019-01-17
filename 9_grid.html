@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		#canvas{
+			background: pink;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="300" height="300">
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas');
+		var context = myCanvas.getContext('2d');
+		var stepx=30,stepy=30,color='blue';
+		context.translate(0.5,0.5)//解决canvas一个像素的问题
+		function drawGrad(color,stepx,stepy){
+			context.strokeStyle=color;
+			context.lineWidth=0.5;
+
+			for(var i=stepx;i<myCanvas.width;i+=stepx){
+				context.beginPath();
+				context.moveTo(i,0);
+				context.lineTo(i,myCanvas.height);
+				context.stroke();
+			}
+
+			for(var i=stepy;i<myCanvas.height;i+=stepy){
+				context.beginPath();
+				context.moveTo(0,i);
+				context.lineTo(myCanvas.width,i);
+				context.stroke();
+			}
+		}
+		drawGrad(color,stepx,stepy)
+	</script>
+</body>
+</html>
