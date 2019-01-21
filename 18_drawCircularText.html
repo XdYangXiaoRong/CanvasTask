@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		#canvas{
+			position: absolute;
+			left:10px;
+			top:10px;
+			box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+			background: #fff;
+			/*cursor: pointer;*/
+			/*border:thin inset rgba(100,150,230,0.5);*/
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="500">
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+			context = myCanvas.getContext('2d'),
+			TEXT_FILL_STYLE='rgba(100,130,240,0.5)',
+			TEXT_STROKE_STYLE='rgba(200,0,0,0.7)',
+			TEXT_SIZE = 64,
+ 
+			circle={
+				x:myCanvas.width/2,
+				y:myCanvas.height/2,
+				radius:200
+			};
+		function drawCircularText(string,startAngle,aroundAngle){
+			var radius = circle.radius,
+				aroundAll=startAngle+aroundAngle<Math.PI*2?startAngle+aroundAngle:Math.PI*2,//所有文本跨越的弧度值，大于360°则按360°显示
+				angleDecrement = (aroundAll)/(string.length+1),
+				angle = parseFloat(startAngle),
+				index=0,
+				character;
+			context.save();
+			context.fillSttyle=TEXT_FILL_STYLE;
+			context.strokeStyle = TEXT_FILL_STYLE;
+			context.font = TEXT_SIZE+'px Lucida Sans';
+
+			while(index<string.length){
+				character = string.charAt(index);
+				console.log(character,angle*180/Math.PI)
+				context.save();
+				context.beginPath();
+				context.translate(circle.x+Math.cos(angle)*radius,circle.y-Math.sin(angle)*radius);
+				context.rotate(Math.PI/2-angle);				
+				context.fillText(character,0,0);
+				context.strokeText(character,0,0);
+				// context.rotate(angleDecrement)
+				angle-=angleDecrement;
+
+				index++;
+				context.restore();
+			}
+			context.restore();
+		}
+		context.textAlign='center';
+		context.textBaseLine='middle';
+	    drawCircularText('writing around the circle',Math.PI,Math.PI)
+	</script>
+</body>
+</html>
