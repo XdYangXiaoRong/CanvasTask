@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		#canvas{
+			position: absolute;
+			left:10px;
+			top:10px;
+			box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+			background: #fff;
+			/*cursor: pointer;*/
+			/*border:thin inset rgba(100,150,230,0.5);*/
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="600" height="500">
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+			context = myCanvas.getContext('2d'),
+		
+            HORIZONTAL_AXIS_MARGIN = 50,
+            VERTICAL_AXIS_MARGIN  = 50,
+           
+
+            AXIOS_ORIGIN = {x:HORIZONTAL_AXIS_MARGIN,y:myCanvas.height-VERTICAL_AXIS_MARGIN },
+
+            AXIOS_TOP = VERTICAL_AXIS_MARGIN,
+            AXIOS_RIGHT = myCanvas.width - HORIZONTAL_AXIS_MARGIN,
+
+            HORIZONTAL_TICK_SPAXING = 10,
+            VERTICAL_TICK_SPACING  = 10,
+
+            AXIOS_WIDTH = AXIOS_RIGHT - AXIOS_ORIGIN.x,
+            AXIOS_HEIGHT = AXIOS_ORIGIN.y - AXIOS_TOP,
+
+            NUM_VERTICAL_TICKS = AXIOS_HEIGHT/VERTICAL_TICK_SPACING,//纵坐标总共有几格子
+            NUM_HORIZONTAL_TICKS = AXIOS_WIDTH/HORIZONTAL_TICK_SPAXING,//横坐标总共有几格子
+
+            //
+            TICK_WIDTH=10,
+            SPACE_BETWEEN_LABELS_AND_AXIS=20;
+
+            //画坐标轴
+            function drawAxes(){
+            	context.save();
+            	context.lineWidth=1.0;
+            	context.fillStyle='rgba(100,140,230,0.8)';
+            	context.strokeStyle = 'rgba(100,140,230,0.8)';
+
+            	//绘制坐标轴主轴
+            	drawHorizontalAxis();
+            	drawVerticalAxis();
+
+            	context.lineWidth=0.5;
+            	context.strokeStyle='navy';
+
+            	context.strokeStyle='darkred';
+
+            	// //绘制坐标轴的分格
+            	drawVerticalAxisTicks();
+            	drawHorizontalAxisTicks();
+
+            	context.restore();
+            }
+
+			function drawHorizontalAxis(){
+				context.beginPath();
+				context.moveTo(AXIOS_ORIGIN.x,AXIOS_ORIGIN.y);
+				context.lineTo(AXIOS_RIGHT,AXIOS_ORIGIN.y);
+				context.stroke();
+			}
+
+			function drawVerticalAxis(){
+				context.beginPath();
+				context.moveTo(AXIOS_ORIGIN.x,AXIOS_ORIGIN.y);
+				context.lineTo(AXIOS_ORIGIN.x,AXIOS_TOP);
+				context.stroke();
+			}
+
+			function drawVerticalAxisTicks(){
+				var deltaX;//左边线的长度
+				for(var i=1;i<NUM_VERTICAL_TICKS;++i){
+					context.beginPath();
+					if(i%5===0){//小精度为1，大精度为5
+						deltaX=TICK_WIDTH;
+					}else{
+						deltaX=TICK_WIDTH/2;
+					}
+					context.moveTo(AXIOS_ORIGIN.x-deltaX,AXIOS_ORIGIN.y-i*VERTICAL_TICK_SPACING);
+					context.lineTo(AXIOS_ORIGIN.x+deltaX,AXIOS_ORIGIN.y-i*VERTICAL_TICK_SPACING);
+					context.stroke();
+				}
+			}
+			function drawHorizontalAxisTicks(){
+				var deltaY;//左边线的长度
+				for(var i=1;i<NUM_HORIZONTAL_TICKS;++i){
+					context.beginPath();
+					if(i%5===0){//小精度为1，大精度为5
+						deltaY=TICK_WIDTH;
+					}else{
+						deltaY=TICK_WIDTH/2;
+					}
+					context.moveTo(AXIOS_ORIGIN.x+i*HORIZONTAL_TICK_SPAXING,AXIOS_ORIGIN.y-deltaY);
+					context.lineTo(AXIOS_ORIGIN.x+i*HORIZONTAL_TICK_SPAXING,AXIOS_ORIGIN.y+deltaY);
+					context.stroke();
+				}
+			}
+			
+			//写文字
+			function drawAxisLabels(){
+				context.fillStyle='blue';
+				context.font='15px Arival'
+				drawHorizontalAxisLabels();
+				drawVerticalAxisLabels();
+			}
+
+			function drawHorizontalAxisLabels(){
+				context.textAlign = 'center';
+				context.textBaseline='top';
+				for(var i=0;i<NUM_HORIZONTAL_TICKS;++i){
+					if(i%5===0){
+						context.fillText(i,AXIOS_ORIGIN.x+i*HORIZONTAL_TICK_SPAXING,AXIOS_ORIGIN.y+SPACE_BETWEEN_LABELS_AND_AXIS);
+					}
+				}
+			}
+			function drawVerticalAxisLabels(){
+				context.textAlign = 'right';
+				context.textBaseline='middle';
+				for(var i=0;i<NUM_VERTICAL_TICKS;++i){
+					if(i%5===0){
+						context.fillText(i,AXIOS_ORIGIN.x-SPACE_BETWEEN_LABELS_AND_AXIS,AXIOS_ORIGIN.y-i*VERTICAL_TICK_SPACING);
+					}
+				}
+			}
+
+	        drawAxes();
+	        drawAxisLabels();
+	</script>
+</body>
+</html>

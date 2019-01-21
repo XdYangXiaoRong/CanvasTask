@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+</head>
+<body>
+	<canvas id="canvas" width="1000" height="1000" style="background-color:pink">
+		该浏览器不支持canvas！
+	</canvas>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+			context = myCanvas.getContext('2d'),
+			image = new Image(),
+			gradient = context.createLinearGradient(0,0,myCanvas.width,myCanvas.height),
+			text="Canvas",
+			pattern;
+
+		// image.src='./picture/mountion_water.jpg';
+
+		function drawGradientText(){
+			context.fillStyle = gradient;
+			context.fillText(text,65,200);
+			context.strokeText(text,65,200);
+		}
+
+		function drawPattenText(){
+			context.fillStyle = pattern;
+			context.fillText(text,65,450);
+			context.strokeText(text,65,450);
+		}
+		image.onload=function(e){
+			pattern = context.createPattern(image,'repeat');
+			drawPattenText();
+		}
+
+		image.src='./picture/mountion_water.jpg';
+
+		context.font="256px Arial";
+		context.strokeStyle="cornflowerblue";
+
+		context.shadowColor='rgba(100,100,150,0.8)';
+		context.shadowOffsetX = 5;
+		context.shadowOffsetY = 10;
+		context.shadowBlur = 10;
+
+		gradient.addColorStop(0,'blue');
+		gradient.addColorStop(0.25,'lightblue');
+		gradient.addColorStop(0.5,'white');
+		gradient.addColorStop(0.75,'red');
+		gradient.addColorStop(1,'yellow');
+		
+		drawGradientText();
+
+	</script>
+</body>
+</html>
