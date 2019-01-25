@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>canvas</title>
+	<style type="text/css">
+		#canvas{
+			position: absolute;
+			left:10px;
+			top:10px;
+			box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+			background: #fff;
+			/*cursor: pointer;*/
+			/*border:thin inset rgba(100,150,230,0.5);*/
+		}
+		#controls{
+			position:absolute;
+			top:25px;
+			left:25px;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="800" height="600">
+		该浏览器不支持canvas！
+	</canvas>
+	<div id="controls">
+		FontSelect:
+		<select id="fontSelect">
+			<option value="helvetica">helvetica</option>
+			<option value="verdana">verdana</option>
+			<option value="palatino">palatino</option>
+		</select>
+
+		SizeSelect:
+		<select id="fontSizeSelect">
+			<option value="12">12</option>
+			<option value="20">20</option>
+			<option value="25">25</option>
+			<option value="30">30</option>
+			<option value="35">35</option>
+			<option value="40">40</option>
+			<option value="50">50</option>
+		</select>
+
+		Strokecolor:
+		<select id="strokeStyleSelect">
+			<option value="red">red</option>
+			<option value="green">green</option>
+			<option value="blue">blue</option>
+			<option value="orange">orange</option>
+			<option value="goldenrod">goldenrod</option>
+			<option value="navy">navy</option>
+			<option value="purple">purple</option>
+		</select>
+
+        Fillcolor:
+        <select id="fillStyleSelect">
+            <option value="red">red</option>
+            <option value="green">green</option>
+            <option value="blue">blue</option>
+            <option value="orange">orange</option>
+            <option value="goldenrod">goldenrod</option>
+            <option value="navy">navy</option>
+            <option value="purple">purple</option>
+        </select>
+    </div>
+	<script type="text/javascript" src="./js/TextCursor.js"></script>
+	<script type="text/javascript" src='./js/TextLine.js'></script>
+	<script type="text/javascript">
+		var myCanvas = document.getElementById('canvas'),
+			context = myCanvas.getContext('2d'),
+
+			fontSelect=document.getElementById('fontSelect'),
+			fontSizeSelect = document.getElementById('fontSizeSelect'),
+			strokeStyleSelect = document.getElementById('strokeStyleSelect'),
+			fillStyleSelect = document.getElementById('fillStyleSelect'),
+
+			cursor = new TextCursor(),
+			drawingSurfaceImageData,
+			line,
+			blinkingInterval,
+			BLINK_TIME=1000,
+			BLINK_OFF=300;
+
+		function windowToCanvas(canvas,x,y){//x,y为当前鼠标相对于坐标轴的位置
+			var bbox=canvas.getBoundingClientRect();
+			//返回相对于canvas的坐标值
+			return {
+				x:x-bbox.left*(canvas.width/bbox.width),
+				y:y-bbox.top*(canvas.height/bbox.height)
+			}
+		}
+
+		function saveDrawingSurface(){
+			drawingSurfaceImageData=context.getImageData(0,0,myCanvas.width,myCanvas.height);
+		}
+
+		//Text
+		function setFont(){
+			context.font=fontSizeSelect.value+'px '+fontSelect.value;
+		}
+
+		//光标的闪烁效果
+		function blinkCursor(x,y){
+			clearInterval(blinkingInterval);
+			blinkingInterval = setInterval(function(e){
+				cursor.erase(context,drawingSurfaceImageData);
+
+				setTimeout(function(e){
+					if(cursor.left==x && cursor.top+cursor.getHeight(context)==y){
+						cursor.draw(context,x,y);
+					}
+					
+				},BLINK_OFF)
+			},BLINK_TIME);
+		}
+
+		function moveCursor(x,y){
+			cursor.erase(context,drawingSurfaceImageData);
+			saveDrawingSurface();
+			context.putImageData(drawingSurfaceImageData,0,0);
+			
+			cursor.draw(context,x,y);
+			blinkCursor(x,y);
+
+		}
+
+		//事件处理
+		myCanvas.onmousedown = function(e){
+			var loc = windowToCanvas(myCanvas,e.clientX,e.clientY);
+			var fontHeight = context.measureText('W').width;
+
+			fontHeight+=fontHeight/6;
+
+			line = new TextLine(loc.x,loc.y);
+			moveCursor(loc.x,loc.y);
+		}
+
+		fillStyleSelect.onchange=function(e){
+			cursor.fillStyle=fillStyleSelect.value;
+			context.fillStyle=fillStyleSelect.value;
+		}
+		strokeStyleSelect.onchange=function(e){
+			// cursor.strokeColor = strokeStyleSelect.value;
+			context.strokeStyle = strokeStyleSelect.value;
+		}
+
+		//Key event handlers
+		document.onkeydown=function(e){
+			if(e.keyCode===8 || e.keyCode===13){//8:删除键，13:回车键
+				e.preventDefault();
+			}
+			if(e.keyCode===8){//Backspace
+				context.save();
+				line.erase(context,drawingSurfaceImageData);
+				line.removeCharacterBeforeCaret();//删除字符
+
+				moveCursor(line.left+line.getWidth(context),line.bottom);//移动光标
+				line.draw(context);
+				context.restore();
+			}
+		}
+
+		document.onkeypress=function(e){
+			console.log(111,e)
+			var key=String.fromCharCode(e.which);
+			if(e.keyCode!==8 && !e.ctrlKey && !key.metaKey){
+				e.preventDefault();
+				context.save();
+				line.erase(context,drawingSurfaceImageData);
+				line.insert(key);
+
+				moveCursor(line.left+line.getWidth(context),line.bottom);
+
+				context.shadowColor = 'rgba(0,0,0,0.5)';
+				context.shadowOffsetX=1,
+				context.shadowOffsetY=1,
+				context.shadowBlur=2;
+
+				line.draw(context);
+				context.restore();
+			}
+		}
+		
+		fontSelect.onchange=setFont;
+		fontSizeSelect.onchange=setFont;
+
+		cursor.fillStyle=fillStyleSelect.value;
+		// cursor.strokeStyle=strokeStyleSelect.value;
+		context.fillStyle=fillStyleSelect.value;
+		context.strokeStyle=strokeStyleSelect.value;
+		context.lineWidth=2.0;
+
+		setFont();                                                 
+		saveDrawingSurface();
+		
+		
+	</script>
+</body>
+</html>
